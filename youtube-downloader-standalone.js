@@ -55,32 +55,49 @@ class YouTubeAudioDownloader {
     return new Promise((resolve, reject) => {
       const file = fs.createWriteStream(this.ytdlpPath);
       
-      https.get(this.ytdlpUrl, (response) => {
+      const request = https.get(this.ytdlpUrl, (response) => {
         // Seguir redirects
         if (response.statusCode === 302 || response.statusCode === 301) {
+          file.close();
+          fs.unlinkSync(this.ytdlpPath);
+          
           https.get(response.headers.location, (redirectResponse) => {
-            redirectResponse.pipe(file);
-            file.on('finish', () => {
-              file.close();
-              console.log('yt-dlp.exe baixado:', this.ytdlpPath);
-              resolve();
+            const finalFile = fs.createWriteStream(this.ytdlpPath);
+            redirectResponse.pipe(finalFile);
+            
+            finalFile.on('finish', () => {
+              finalFile.close(() => {
+                console.log('yt-dlp.exe baixado:', this.ytdlpPath);
+                // Aguardar um pouco para garantir que o arquivo foi escrito completamente
+                setTimeout(resolve, 500);
+              });
             });
-          }).on('error', reject);
+            
+            finalFile.on('error', (err) => {
+              fs.unlink(this.ytdlpPath, () => {});
+              reject(err);
+            });
+          }).on('error', (err) => {
+            fs.unlink(this.ytdlpPath, () => {});
+            reject(err);
+          });
         } else {
           response.pipe(file);
           file.on('finish', () => {
-            file.close();
-            console.log('yt-dlp.exe baixado:', this.ytdlpPath);
-            resolve();
+            file.close(() => {
+              console.log('yt-dlp.exe baixado:', this.ytdlpPath);
+              // Aguardar um pouco para garantir que o arquivo foi escrito completamente
+              setTimeout(resolve, 500);
+            });
+          });
+          
+          file.on('error', (err) => {
+            fs.unlink(this.ytdlpPath, () => {});
+            reject(err);
           });
         }
       }).on('error', (err) => {
         fs.unlink(this.ytdlpPath, () => {}); // Remover arquivo incompleto
-        reject(err);
-      });
-
-      file.on('error', (err) => {
-        fs.unlink(this.ytdlpPath, () => {});
         reject(err);
       });
     });
@@ -121,34 +138,29 @@ class YouTubeAudioDownloader {
       // Definir nome do arquivo de saída
       const outputTemplate = path.join(this.audioDir, '%(title)s [%(id)s].%(ext)s');
 
-      // Argumentos do yt-dlp
+      // Argumentos do yt-dlp - download direto sem conversão
       const args = [
         url,
-        '--extract-audio',
-        '--audio-format', 'm4a',
-        '--audio-quality', '0',
+        '--format', 'bestaudio',
         '--output', outputTemplate,
         '--no-playlist',
-        '--print', 'after_move:filepath',
-        '--print', 'title',
         '--newline',
         '--no-warnings',
-        '--no-cache-dir'
+        '--no-cache-dir',
+        '--no-check-certificates'
       ];
 
       return new Promise((resolve, reject) => {
-        const ytdlp = spawn(this.ytdlpPath, args);
+        const ytdlp = spawn(this.ytdlpPath, args, {
+          windowsHide: true,
+          stdio: ['ignore', 'pipe', 'pipe']
+        });
         
-        let outputPath = null;
-        let videoTitle = null;
         let lastProgress = 10;
-        let outputLines = [];
 
         ytdlp.stdout.on('data', (data) => {
           const output = data.toString();
           console.log('yt-dlp output:', output);
-          
-          outputLines.push(output.trim());
 
           // Detectar progresso
           const progressMatch = output.match(/(\d+\.\d+)%/);
@@ -172,37 +184,29 @@ class YouTubeAudioDownloader {
         ytdlp.on('close', (code) => {
           if (code === 0) {
             // yt-dlp finalizado com sucesso
-            // As últimas linhas contêm: título e filepath
-            if (outputLines.length >= 2) {
-              videoTitle = outputLines[outputLines.length - 2].trim();
-              outputPath = outputLines[outputLines.length - 1].trim();
-            }
-
-            // Procurar arquivo se não encontrado na saída
-            if (!outputPath || !fs.existsSync(outputPath)) {
-              const files = fs.readdirSync(this.audioDir);
-              const recentFile = files
-                .filter(f => f.includes(videoId))
-                .sort((a, b) => {
-                  const statA = fs.statSync(path.join(this.audioDir, a));
-                  const statB = fs.statSync(path.join(this.audioDir, b));
-                  return statB.mtimeMs - statA.mtimeMs;
-                })[0];
+            // Buscar o arquivo baixado no diretório
+            const files = fs.readdirSync(this.audioDir);
+            const downloadedFile = files
+              .filter(f => f.includes(videoId))
+              .sort((a, b) => {
+                const statA = fs.statSync(path.join(this.audioDir, a));
+                const statB = fs.statSync(path.join(this.audioDir, b));
+                return statB.mtimeMs - statA.mtimeMs;
+              })[0];
+            
+            if (downloadedFile) {
+              const outputPath = path.join(this.audioDir, downloadedFile);
+              const videoTitle = downloadedFile
+                .replace(/\.[^/.]+$/, '') // remove extensão
+                .replace(/\[.*?\]$/, '') // remove [videoId]
+                .trim();
               
-              if (recentFile) {
-                outputPath = path.join(this.audioDir, recentFile);
-                if (!videoTitle) {
-                  videoTitle = recentFile.replace(/\.[^/.]+$/, '').replace(/\[.*?\]$/, '').trim();
-                }
-              }
-            }
-
-            if (outputPath && fs.existsSync(outputPath)) {
-              if (onProgress) onProgress(100);
               console.log('✅ Download concluído:', outputPath);
+              if (onProgress) onProgress(100);
+              
               resolve({ 
                 path: outputPath, 
-                title: videoTitle || path.parse(outputPath).name 
+                title: videoTitle 
               });
             } else {
               reject(new Error('Download concluído mas arquivo não encontrado'));
@@ -213,7 +217,14 @@ class YouTubeAudioDownloader {
         });
 
         ytdlp.on('error', (error) => {
-          reject(new Error(`Erro ao executar yt-dlp: ${error.message}`));
+          console.error('❌ Erro spawn:', error);
+          
+          // Se for erro de spawn UNKNOWN, pode ser Windows bloqueando
+          if (error.code === 'UNKNOWN' || error.message.includes('spawn')) {
+            reject(new Error('Erro ao iniciar yt-dlp. Tente executar o aplicativo como Administrador ou verifique se o antivírus está bloqueando.'));
+          } else {
+            reject(new Error(`Erro ao executar yt-dlp: ${error.message}`));
+          }
         });
       });
     } catch (error) {
