@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatPlay - Soundboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <div class="logo">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M9 18V5l12-2v13M9 18l-7 2V7l7-2" />
+          </svg>
+          <h1>ChatPlay</h1>
+        </div>
+        <div class="header-actions">
+          <button id="settingsBtn" class="icon-btn" title="Configurações">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 1v6m0 6v6m10-10h-6m-6 0H4" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" data-tab="soundboard">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+          Soundboard
+        </button>
+        <button class="tab" data-tab="add">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+          Adicionar Áudio
+        </button>
+        <button class="tab" data-tab="voice">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+            <line x1="12" y1="19" x2="12" y2="23" />
+            <line x1="8" y1="23" x2="16" y2="23" />
+          </svg>
+          Efeitos de Voz
+        </button>
+      </div>
+
+      <!-- Content -->
+      <main class="content">
+        <!-- Soundboard Tab -->
+        <div id="soundboard" class="tab-content active">
+          <div class="section-header">
+            <h2>Meus Áudios</h2>
+            <button id="sortSoundsBtn" class="btn-primary">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 6h18M3 12h15M3 18h12"/>
+              </svg>
+              Ordenar
+            </button>
+          </div>
+          
+          <!-- Sound List -->
+          <div id="soundList" class="sound-list">
+            <div class="empty-state">
+              <svg
+                width="64"
+                height="64"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+              >
+                <path d="M9 18V5l12-2v13" />
+                <circle cx="6" cy="18" r="3" />
+                <circle cx="18" cy="16" r="3" />
+              </svg>
+              <p>Nenhum áudio adicionado</p>
+              <p class="text-small">Vá para "Adicionar Áudio" para começar</p>
+            </div>
+          </div>
+          
+        </div>
+
+        <!-- Add Audio Tab -->
+        <div id="add" class="tab-content">
+          <div class="section-header">
+            <h2>Adicionar Áudio</h2>
+            <p style="color: #5f6368; font-size: 14px; margin-top: 8px;">
+              Adicione arquivos do seu computador ou baixe do YouTube
+            </p>
+          </div>
+          
+          <!-- Add Local File -->
+          <div style="margin-bottom: 32px;">
+            <h3 style="margin-bottom: 12px; color: #202124; font-size: 16px; font-weight: 500;">
+              📁 Arquivo Local
+            </h3>
+            <button id="addSoundBtn" class="btn-primary" style="width: 100%;">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              Selecionar Arquivo de Áudio
+            </button>
+            <p style="color: #5f6368; font-size: 12px; margin-top: 8px; text-align: center;">
+              Formatos suportados: MP3, WAV, OGG, FLAC, M4A
+            </p>
+          </div>
+          
+          <div style="border-top: 1px solid var(--border-color); margin: 32px 0;"></div>
+          
+          <!-- Download from YouTube -->
+          <div>
+            <h3 style="margin-bottom: 12px; color: #202124; font-size: 16px; font-weight: 500;">
+              📥 Download do YouTube
+            </h3>
+            <div class="youtube-input-container">
+              <input
+                type="text"
+                id="youtubeUrl"
+                class="input-field"
+                placeholder="Cole o link do YouTube aqui (ex: https://youtube.com/watch?v=...)"
+              />
+              <button id="downloadYoutubeBtn" class="btn-primary">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                Baixar Áudio
+              </button>
+            </div>
+            <div id="youtubeStatus" class="status-message"></div>
+          </div>
+        </div>
+
+        <!-- Voice Effects Tab (unchanged below) -->
+        <div id="voice" class="tab-content">
+          <div class="section-header">
+            <h2>Efeitos de Voz</h2>
+          </div>
+
+          <div class="voice-control">
+            <div class="mic-status">
+              <div id="micIndicator" class="mic-indicator"></div>
+              <span id="micStatus">Microfone: Desligado</span>
+            </div>
+            <button id="toggleMicBtn" class="btn-large btn-primary">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"
+                />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+                <line x1="8" y1="23" x2="16" y2="23" />
+              </svg>
+              Ativar Microfone
+            </button>
+          </div>
+
+          <div class="effects-grid">
+            <div class="effect-card" data-effect="none">
+              <div class="effect-icon">🎤</div>
+              <h3>Normal</h3>
+              <p>Sem efeitos</p>
+            </div>
+            <div class="effect-card" data-effect="chipmunk">
+              <div class="effect-icon">🐿️</div>
+              <h3>Chipmunk</h3>
+              <p>Voz aguda e rápida</p>
+            </div>
+            <div class="effect-card" data-effect="deep">
+              <div class="effect-icon">🎸</div>
+              <h3>Grave</h3>
+              <p>Voz profunda</p>
+            </div>
+            <div class="effect-card" data-effect="robot">
+              <div class="effect-icon">🤖</div>
+              <h3>Robô</h3>
+              <p>Voz robótica</p>
+            </div>
+            <div class="effect-card" data-effect="tremolo">
+              <div class="effect-icon">🌊</div>
+              <h3>Tremolo</h3>
+              <p>Vibrato intenso</p>
+            </div>
+            <div class="effect-card" data-effect="echo">
+              <div class="effect-icon">🔊</div>
+              <h3>Echo</h3>
+              <p>Efeito de eco</p>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <div>
+              <strong>Dica:</strong> Configure sua saída de áudio virtual
+              (VB-Cable) nas configurações do Windows e selecione-a no
+              Discord/jogos como dispositivo de entrada.
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Audio Player (Fixed at bottom) -->
+    <div id="audioPlayerBar" class="audio-player-bar hidden">
+      <div class="player-content">
+        <div class="player-info">
+          <svg class="player-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="10" opacity="0.2"/>
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+          <div class="player-text">
+            <div class="player-title" id="playerTitle">Sem áudio tocando</div>
+            <div class="player-subtitle" id="playerSubtitle">Adicione um áudio para começar</div>
+          </div>
+        </div>
+        
+        <div class="player-controls">
+          <button class="player-btn" id="playerPrevBtn" title="Anterior">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="19 20 9 12 19 4 19 20"/>
+              <line x1="5" y1="19" x2="5" y2="5"/>
+            </svg>
+          </button>
+          
+          <button class="player-btn player-btn-play" id="playerPlayBtn" title="Reproduzir/Pausar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+          
+          <button class="player-btn" id="playerNextBtn" title="Próximo">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="5 4 15 12 5 20 5 4"/>
+              <line x1="19" y1="5" x2="19" y2="19"/>
+            </svg>
+          </button>
+          
+          <button class="player-btn" id="playerStopBtn" title="Parar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="6" width="12" height="12"/>
+            </svg>
+          </button>
+        </div>
+        
+        <div class="player-volume">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+          <input type="range" id="playerVolume" class="volume-slider" min="0" max="100" value="100">
+          <span id="playerVolumeValue" class="volume-value">100%</span>
+        </div>
+      </div>
+      
+      <div class="player-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" id="playerProgress"></div>
+        </div>
+        <div class="progress-time">
+          <span id="playerCurrentTime">0:00</span>
+          <span id="playerDuration">0:00</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audio elements (hidden) -->
+    <audio id="audioPlayer" style="display: none"></audio>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

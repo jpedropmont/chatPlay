@@ -1,0 +1,7 @@
+<!-- Simple SVG icon placeholder -->
+<svg width="256" height="256" xmlns="http://www.w3.org/2000/svg">
+  <rect width="256" height="256" fill="#1a73e8" rx="32"/>
+  <path d="M80 160V60l90-15v115M80 160l-40 15V75l40-15" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="60" cy="175" r="20" fill="white"/>
+  <circle cx="150" cy="160" r="20" fill="white"/>
+</svg>
